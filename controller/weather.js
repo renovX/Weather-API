@@ -31,8 +31,7 @@ function generate(string,string1)
 exports.getWeatherData=(req,res,next)=>
 {
     const district_name=req.params.district
-    District.findOne({name:district_name})
-    .then(district=>
+    District.findByName(district_name,district=>
         {
             if(district)
             {
@@ -69,30 +68,27 @@ exports.getWeatherData=(req,res,next)=>
 exports.addDistrict=(req,res,next)=>
 {
     const name=req.params['name']
-    
     const value=req.params['value']
-    District.findOne({name:name})
-    .then(district=>
+    District.findByName(name,district=>
         {
             if(district)
             res.send("District already is presnt")
         
             else
             {
-                const newDistrict=District({name:name,value:value,isNum:value[0]=="@"?true:false})
-                return newDistrict.save().then(()=>
-                res.send('succesfully added'))
-                
+                const isNum=value[0]=="@"?true:false
+                const newDistrict=new District(name,value,isNum)
+                District.addDistrict(newDistrict)
+                res.send("Success")                
             }
         })
-    .catch(err=>{console.log(err)})
+    
     
 }
 exports.getDistrictList=(req,res,next)=>
 {
     
-    District.find()
-    .then(districts=>
+    District.findAll(districts=>
         {
             const list=[]
             districts.forEach(district=>
@@ -102,5 +98,5 @@ exports.getDistrictList=(req,res,next)=>
                 )
             res.send(list)
         })
-    .catch(err=>{console.log(err)})
+    
 }

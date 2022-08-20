@@ -1,22 +1,46 @@
-const mongoose=require('mongoose')
-const districtSchema=mongoose.Schema(
+const fs=require('fs')
+const path=require('../util/path')
+module.exports=class District
+{
+    constructor(name,value,isNum)
     {
-        name:
-        {
-            type:String,
-            require:true
-        },
-        value:
-        {
-            type:String,
-            require:true
-        },
-        isNum:
-        {
-            type:Boolean,
-            require:true
-        }
-        
+        this.name=name;
+        this.value=value;
+        this.isNum=isNum;
     }
-)
-module.exports=mongoose.model('districts',districtSchema)
+    static findAll(cb)
+    {
+        fs.readFile(path,(err,fileContent)=>
+        {
+            if(err)console.log(err)
+            const list=JSON.parse(fileContent);
+            cb(list)
+        })
+    }
+    static findByName(name,cb)
+    {
+        fs.readFile(path,(err,fileContent)=>
+        {
+            if(err)console.log(err)
+            const list=JSON.parse(fileContent);
+            const district=list.find(d=>{return d.name==name})
+            
+            cb(district)
+        })
+    }
+    static addDistrict(district)
+    {
+        fs.readFile(path,(err,fileContent)=>
+        {
+            if(err)console.log(err)
+            const list=JSON.parse(fileContent);
+            list.push(district)
+            fs.writeFile(path,JSON.stringify(list),err=>
+            {
+                if(err)console.log(err)
+                else
+                console.log("Write succesful")
+            })
+        })
+    }
+}
