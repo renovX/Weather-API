@@ -3,7 +3,7 @@ const cheerio=require('cheerio')
 const express=require('express')
 const weatherRoutes=require('./routes/weather')
 const app=express()
-
+let port=process.env.PORT||3000
 app.use(weatherRoutes)
 app.use("/",(req,res,next)=>
 {
@@ -15,4 +15,4 @@ app.use("/",(req,res,next)=>
     next()
 })
 
-app.listen(4000)
+app.listen(port)
