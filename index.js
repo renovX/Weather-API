@@ -4,8 +4,7 @@ const express=require('express')
 const weatherRoutes=require('./routes/weather')
 const app=express()
 let port=process.env.PORT||3000
-app.use(weatherRoutes)
-app.use("/",(req,res,next)=>
+app.get("/",(req,res,next)=>
 {
     res.write("Welcome\n'/getweather/<district-name>' to get weather\nadd-district/<district-name>/<district-code>'  to add a new district\n'/district-list' To list all districts available")
     res.write("'/getweather/<district-name>' to get weather\n")
@@ -13,6 +12,12 @@ app.use("/",(req,res,next)=>
     res.write("'/district-list' To list all districts available")
     res.end()
     next()
+})
+app.use(weatherRoutes)
+app.use((req,res,next)=>
+{
+    req.statusCode=404;
+    res.send("404 Not Found")
 })
 
 app.listen(port)
