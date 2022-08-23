@@ -11,19 +11,22 @@ function generate(string,string1)
     const m=string.search("Humidity")
     const n=string.search("Dew Point")
 
-    const temperature=string1.substring(3,5)+"°C";
-    const cloud=string1.substring(0,string1.search(".")).trim()
-    const wind=string1.substring(string1.search("Wind")+6).trim()
-
+    //in us this will be in 
+    const temperature=parseInt(string1.substring(3,5).match(/\d+/)[0]);
+    const cloud=string1.substring(0,string1.search("F")).trim()
+    const wind=string1.substring(string1.search("Wind")+6).trim();
 
     const location=string.substring(0,i).split(":")[1].trim()
-    const currentTime=string.substring(i,j).split(":")[1].trim()
-    const latest=string.substring(j,k).split(":")[1].trim()
-    const visibility=string.substring(k,l).split(":")[1].trim()
-    const pressure=string.substring(l,m).split(":")[1].trim()
-    const humidity=string.substring(m,n).split(":")[1].trim()
-    const dewp=string.substring(n).split(":")[1].trim()
-    return {temperature:temperature,location:location,cloud:cloud,visibility:visibility,pressure:pressure,humidity:humidity,dewp:dewp,wind:wind}
+    const visibility=parseInt(string.substring(k,l).split(":")[1].trim().match(/\d+/)[0]);
+    const pressure=parseInt(string.substring(l,m).split(":")[1].trim().match(/\d+/)[0]);
+    const humidity=parseInt(string.substring(m,n).split(":")[1].trim().match(/\d+/)[0]);
+    const dewp=parseInt(string.substring(n).split(":")[1].trim().match(/\d+/)[0]);
+    return {temperature:temperature,
+        weather_location:location,
+        visibility:visibility,
+        pressure:pressure,
+        humidity:humidity,
+        dewp:dewp,wind:wind}
 
     
 }
@@ -31,8 +34,7 @@ function generate(string,string1)
 exports.getWeatherData=(req,res,next)=>
 {
     const district_name=req.params.district
-    District.findOne({name:district_name})
-    .then(district=>
+    District.findByName(district_name,district=>
         {
             if(district)
             {
@@ -50,11 +52,12 @@ exports.getWeatherData=(req,res,next)=>
                         const $=cheerio.load(webData.data)
                         const data=$(".table.table--left.table--inner-borders-rows").text()
                         const data2=$("#qlook").text()
-                        const ob=generate(data.toString(),data2.toString())
+                        const clouds=$('#cur-weather').attr('title')
+                        console.log(clouds)
+                        var ob=generate(data.toString(),data2.toString())
+                        ob.clouds=clouds
                         res.send(ob)
-                        //res.end()
-                        //console.log(data2)
-                        //fs.writeFile('./sample.txt',res.data,err=>{console.log(err)})
+                        
                     
                     })
                 .catch(err=>{console.log(err)})
@@ -69,30 +72,27 @@ exports.getWeatherData=(req,res,next)=>
 exports.addDistrict=(req,res,next)=>
 {
     const name=req.params['name']
-    
     const value=req.params['value']
-    District.findOne({name:name})
-    .then(district=>
+    District.findByName(name,district=>
         {
             if(district)
             res.send("District already is presnt")
         
             else
             {
-                const newDistrict=District({name:name,value:value,isNum:value[0]=="@"?true:false})
-                return newDistrict.save().then(()=>
-                res.send('succesfully added'))
-                
+                const isNum=value[0]=="@"?true:false
+                const newDistrict=new District(name,value,isNum)
+                District.addDistrict(newDistrict)
+                res.send("Success")                
             }
         })
-    .catch(err=>{console.log(err)})
+    
     
 }
 exports.getDistrictList=(req,res,next)=>
 {
     
-    District.find()
-    .then(districts=>
+    District.findAll(districts=>
         {
             const list=[]
             districts.forEach(district=>
@@ -102,5 +102,5 @@ exports.getDistrictList=(req,res,next)=>
                 )
             res.send(list)
         })
-    .catch(err=>{console.log(err)})
+    
 }

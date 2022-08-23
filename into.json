@@ -1,0 +1,7 @@
+"Welcome\n"
+    res.write("'/getweather/<district-name>' to get weather\n")
+    res.write("'/add-district/<district-name>/<district-code>'  to add a new district\n
+"'/district-list' To list all districts available")
+    res.end()
+    next()
+})
