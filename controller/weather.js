@@ -53,7 +53,7 @@ exports.getWeatherData=(req,res,next)=>
                         const data=$(".table.table--left.table--inner-borders-rows").text()
                         const data2=$("#qlook").text()
                         const clouds=$('#cur-weather').attr('title')
-                        console.log(clouds)
+                        //console.log(clouds)
                         var ob=generate(data.toString(),data2.toString())
                         ob.clouds=clouds
                         res.send(ob)
